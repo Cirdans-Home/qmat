@@ -109,7 +109,16 @@ ALL_GENERATORS:dict[str, type[QDeltaGenerator]] = getClasses(QDELTA_GENERATORS)
 @pytest.mark.parametrize("name", ALL_GENERATORS.keys())
 def testUseQGen(name):
     from qmat.qcoeff.collocation import Collocation
-    qGen = Collocation.getInstance()
+    from qmat.qdelta.structured import RadauRankTwo
 
-    qDeltaGen = ALL_GENERATORS[name](qGen=qGen)
-    assert np.allclose(qDeltaGen.getQDelta(), qDeltaGen.genCoeffs())
+    qGen = Collocation.getInstance()
+    generator = ALL_GENERATORS[name]
+
+    params = {"alpha": 0.5, "beta": 0.1} if generator is RadauRankTwo else {}
+
+    qDeltaGen = generator(qGen=qGen, **params)
+
+    assert np.allclose(
+        qDeltaGen.getQDelta(),
+        qDeltaGen.genCoeffs(),
+    )
